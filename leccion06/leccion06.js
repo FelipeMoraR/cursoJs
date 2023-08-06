@@ -11,7 +11,7 @@ console.log(".......................................");
 autos[1] = "cambiazo" ;
 
 //Traveling through the modified array 
-for ( let i = 0; i < autos.length; i++){
+for ( let i = 0; i < autos.length; i++) {
     console.log(i + " : " + autos[i]);
     
 }
