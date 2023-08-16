@@ -1,0 +1,24 @@
+Para que sirve el head en html?
+
+R:
+
+Que es el head en html?
+
+R: 
+
+Que es el DOM en html?
+
+R: Es el documento html de una pagina en donde interactuan todos los elementos
+
+Que hace innerHTML? 
+R: 
+
+Que es DOMContentLoaded ?
+R:
+
+Para que sirve? 
+R:
+
+Cuales son las propiedades de manipulación de contenido de elementos    HTML ?
+
+R: textContent, innerHTML, outerHTML, value, src, alt, href, classList, style, dataset.
