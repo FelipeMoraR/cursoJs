@@ -11,6 +11,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (ctx) {
             
+            var gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+
+            gradient.addColorStop(0, "green");
+            gradient.addColorStop(0.45, "white");
+            gradient.addColorStop(0.55, "red");
+            gradient.addColorStop(1, "cyan");
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
 
         } else {
 
