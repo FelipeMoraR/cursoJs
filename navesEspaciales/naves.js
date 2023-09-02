@@ -30,7 +30,16 @@ function Bala(x, y, w){
     this.x = x;
     this.y = y;
     this.w = w;
-    this.dibujar = function() { };
+    this.dibujar = function() { 
+
+        //Dibujar la bala
+        game.ctx.save();
+        game.ctx.fillStyle = game.colorBala;
+        game.ctx.fillRect(this.x, this.y, this.w, this.w);
+        this.y = this.y - 4;
+        game.ctx.restore();
+
+    };
 
 }
 
@@ -55,7 +64,11 @@ function Enemigo(x, y){
     this.num = 14;
     this.figura = true;
     this.vive = true;
-    this.dibujar = function () {};
+    this.dibujar = function () {
+
+        game.ctx.drawImage(game.imagenEnemigo, 0, 0, 40, 30, this.x, this.y, 35, 30);
+
+    };
 }
 
 
@@ -113,10 +126,17 @@ const animar = () =>{
 const verificar = () => {
 
     if(game.tecla[KEY_RIGHT]) game.x += 10;
-
     if(game.tecla[KEY_LEFT]) game.x -= 10;
 
-    
+    //Verificacion de cañon
+    if(game.x > game.canvas.width - 35) game.x = game.canvas.width - 35;
+    if(game.x < 0) game.x = 1; 
+
+    //Disparo
+    if(game.tecla[BARRA]){
+        game.balas_array.push(new Bala(game.jugador.x + 12, game.jugador.y - 3, 5))
+        game.tecla[BARRA] = false;
+    }
 
 
 }
@@ -126,10 +146,30 @@ const verificar = () => {
 const pintar = () => {
 
     game.ctx.clearRect(0, 0, game.canvas.width, game.canvas.height);
-
     game.jugador.dibujar(game.x);
 
+    //Movimiento de balas
+    for(var i = 0; i < game.balas_array.length; i++){
+
+        if(game.balas_array[i] != null){
+    
+            game.balas_array[i].dibujar();
+
+            if(game.balas_array[i].y < 0) game.balas_array[i] = null;
+    
+        }
+    }
+
+    //Enemigos
+    for(var i = 0; i < game.enemigos_array.length; i++){
+        
+        game.enemigos_array[i].dibujar();
+
+    }
+
 }
+
+
 
 
 
@@ -166,7 +206,26 @@ document.addEventListener("DOMContentLoaded", function(){
             game.imagen = new Image();
             game.imagen.src = "imagen/torre.fw.png";
 
+            //Crear enemigos
+            game.imagenEnemigo = new Image();
+            game.imagenEnemigo.src = "imagen/invader.fw.png"
+            game.imagenEnemigo.onload = function(){
+
+                for(var i = 0; i < 5; i++){
+
+                    for(var j = 0; j < 10; j++){
+
+                        game.enemigos_array.push(new Enemigo(100 + 40*j, 30+45*i ));
+
+                    }
+
+                }    
+
+            }
+            
+
             caratula();
+            
             game.canvas.addEventListener("click", seleccionar, false);
             
             
