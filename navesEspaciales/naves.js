@@ -12,6 +12,7 @@ game = {
     colorBala : "red",
     balas_array : new Array(),
     enemigos_array : new Array(),
+    disparo : false,
 
 }
 
@@ -30,7 +31,7 @@ function Bala(x, y, w){
     this.x = x;
     this.y = y;
     this.w = w;
-    this.dibujar = function() { 
+    this.dibujar = function(z) { 
 
         //Dibujar la bala
         game.ctx.save();
@@ -55,18 +56,58 @@ function Jugador(x){
 }
 
 function Enemigo(x, y){
+
     this.x = x;
     this.y = y;
-    this.w = 35;
+    this.w = 40;
     this.veces = 0;
     this.dx = 5;
     this.ciclos = 0;
-    this.num = 14;
+    this.num = 70;
     this.figura = true;
     this.vive = true;
     this.dibujar = function () {
 
-        game.ctx.drawImage(game.imagenEnemigo, 0, 0, 40, 30, this.x, this.y, 35, 30);
+        //Retraso
+        if(this.ciclos > 30){
+            //Saltitos
+            if(this.veces > this.num){
+
+                this.dx *= -1;
+                this.veces = 0;
+                this.num = 70;
+                this.y += 20;
+                this.dx = (this.dx > 0) ? this.dx++ : this.dx--; 
+            
+            }else{
+
+                this.x += this.dx;
+
+
+            }
+
+            this.veces ++;
+            this.ciclos = 0;
+            this.figura = !this.figura;
+
+
+        }else{
+
+            this.ciclos++;
+
+        }
+
+        if(this.figura){
+
+            game.ctx.drawImage(game.imagenEnemigo, 0, 0, 40, 30, this.x, this.y, 35, 30);
+
+        }else{
+
+            game.ctx.drawImage(game.imagenEnemigo, 50, 0, 35, 30, this.x, this.y, 35, 30);
+
+        }
+
+        
 
     };
 }
@@ -120,7 +161,36 @@ const animar = () =>{
     requestAnimationFrame(animar);
     verificar();
     pintar();
+    colisiones();
 
+}
+
+const colisiones = () =>{
+
+    let enemigo, bala;
+
+    for(var i=0; i < game.enemigos_array.length; i++){
+        for(var j=0; j < game.balas_array.length; j++){
+
+            enemigo = game.enemigos_array[i];
+            bala = game.balas_array[j];
+
+            if(enemigo != null && bala != null){
+
+                if((bala.x > enemigo.x) && 
+                (bala.x < enemigo.x + enemigo.w) &&
+                (bala.y > enemigo.y) &&
+                (bala.y < enemigo.y + enemigo.w)){
+
+                    enemigo.vive = false;
+                    game.enemigos_array[i] = null;
+                    game.balas_array[j] = null;
+                    game.disparo = false;
+
+                }
+            }
+        }
+    }
 }
 
 const verificar = () => {
@@ -134,8 +204,15 @@ const verificar = () => {
 
     //Disparo
     if(game.tecla[BARRA]){
-        game.balas_array.push(new Bala(game.jugador.x + 12, game.jugador.y - 3, 5))
-        game.tecla[BARRA] = false;
+
+        if(game.disparo == false){
+
+            game.balas_array.push(new Bala(game.jugador.x + 12, game.jugador.y - 3, 5))
+            game.tecla[BARRA] = false;
+            game.disparo = true;
+
+        }
+        
     }
 
 
@@ -155,7 +232,13 @@ const pintar = () => {
     
             game.balas_array[i].dibujar();
 
-            if(game.balas_array[i].y < 0) game.balas_array[i] = null;
+            if(game.balas_array[i].y < 0){
+
+                game.disparo = false;
+                game.balas_array[i] = null;
+                
+
+            } 
     
         }
     }
@@ -163,7 +246,10 @@ const pintar = () => {
     //Enemigos
     for(var i = 0; i < game.enemigos_array.length; i++){
         
-        game.enemigos_array[i].dibujar();
+        if(game.enemigos_array[i] != null){
+            game.enemigos_array[i].dibujar();
+        }   
+       
 
     }
 
@@ -211,8 +297,10 @@ document.addEventListener("DOMContentLoaded", function(){
             game.imagenEnemigo.src = "imagen/invader.fw.png"
             game.imagenEnemigo.onload = function(){
 
+                //Filas
                 for(var i = 0; i < 5; i++){
-
+                    
+                    //Columnas
                     for(var j = 0; j < 10; j++){
 
                         game.enemigos_array.push(new Enemigo(100 + 40*j, 30+45*i ));
