@@ -10,9 +10,13 @@ game = {
     teclaPulsada : null,
     tecla : [],
     colorBala : "red",
+    colorBala2 : "green",
     balas_array : new Array(),
+    balasEnemigas_array : new Array(),
     enemigos_array : new Array(),
     disparo : false,
+    puntos: 0,
+    finJuego : false,
 
 }
 
@@ -42,6 +46,14 @@ function Bala(x, y, w){
 
     };
 
+    this.disparar = function() {
+        game.ctx.save();
+        game.ctx.fillStyle = game.colorBala2;
+        game.ctx.fillRect(this.x, this.y, this.w, this.w);
+        this.y = this.y + 4;
+        game.ctx.restore();
+    }
+
 }
 
 
@@ -49,9 +61,11 @@ function Bala(x, y, w){
 function Jugador(x){
     this.x = x;
     this.y = 450;
+    this.w = 40;
+    this.h = 15;
     this.dibujar = function (x){
         this.x = x;
-        game.ctx.drawImage(game.imagen, this.x, this.y, 30, 15);
+        game.ctx.drawImage(game.imagen, this.x, this.y, this.w, this.h);
     };
 }
 
@@ -157,11 +171,17 @@ const inicio = () => {
 
 
 const animar = () =>{
-            
-    requestAnimationFrame(animar);
-    verificar();
-    pintar();
-    colisiones();
+    if(game.finJuego == false){
+        requestAnimationFrame(animar);
+        verificar();
+        pintar();
+        colisiones();
+    }else{
+
+
+    }
+    
+
 
 }
 
@@ -186,11 +206,34 @@ const colisiones = () =>{
                     game.enemigos_array[i] = null;
                     game.balas_array[j] = null;
                     game.disparo = false;
+                    game.puntos += 10;
 
                 }
             }
         }
     }
+
+
+    //Colision balas enemigas
+
+    for(var j = 0; j < game.balasEnemigas_array.length; j++){
+
+        bala = game.balasEnemigas_array[j];
+
+        if(bala != null){
+
+            if((bala.x > game.jugador.x) && 
+            (bala.x < game.jugador.x + game.jugador.w) &&
+            (bala.y > game.jugador.y) &&
+            (bala.y < game.jugador.y + game.jugador.h)){
+
+                gameOver();
+
+            }
+        }
+
+    }
+    
 }
 
 const verificar = () => {
@@ -215,15 +258,37 @@ const verificar = () => {
         
     }
 
+    //disparo enemigo
+    if(Math.random() > 0.96){
+        
+        dispararEnemigo();
+
+    }
 
 }
 
+const dispararEnemigo = () => {
+    var ultimos = new Array;
 
+    for(var i = game.enemigos_array.length - 1; i>0; i--){
+        if(game.enemigos_array[i] != null){
+            ultimos.push(i);
+        }
+
+        if(ultimos.length == 10) break;
+    }
+
+    d = ultimos[Math.floor(Math.random() * 10)];
+    
+    game.balasEnemigas_array.push(new Bala(game.enemigos_array[d].x + game.enemigos_array[d].w/2, game.enemigos_array[d].y, 5));
+
+}
 
 const pintar = () => {
 
     game.ctx.clearRect(0, 0, game.canvas.width, game.canvas.height);
     game.jugador.dibujar(game.x);
+    score();
 
     //Movimiento de balas
     for(var i = 0; i < game.balas_array.length; i++){
@@ -243,6 +308,20 @@ const pintar = () => {
         }
     }
 
+    //Balas enemigas
+    for(var i = 0; i < game.balasEnemigas_array.length; i++){
+
+        if(game.balasEnemigas_array[i] != null){
+
+            game.balasEnemigas_array[i].disparar();
+
+            if(game.balasEnemigas_array[i].y > game.canvas.height){
+
+                game.balasEnemigas_array[i] = null;
+            }
+        }
+    }
+
     //Enemigos
     for(var i = 0; i < game.enemigos_array.length; i++){
         
@@ -255,7 +334,49 @@ const pintar = () => {
 
 }
 
+const gameOver = () => {
+    game.ctx.clearRect(0, 0, game.canvas.width, game.canvas.height);
+    game.balas_array = [];
+    game.enemigos_array = [];
+    game.balasEnemigas_array = [];
+    game.finJuego = true;
+    mensaje("Game over" , 100, 60);
+    mensaje("Lograste " + game.puntos + " puntos", 220);
 
+    if(game.puntos>100 || game.puntos <= 200){
+
+        mensaje("Casi lo logras" , 340);
+
+    }else if(game.puntos > 200){
+        mensake("Felicitaciones", 340)
+    }else{
+        mensaje("Lo sentimos" , 100, 60);
+    }
+
+}
+
+const mensaje = (cadena, y , tamano = 40) =>{
+    let medio = (game.canvas.width)/2;
+    
+    game.ctx.save();
+    game.ctx.fillStyle = "green";
+    game.ctx.strokeStyle = "blue";
+    game.ctx.textBaseline = "top";
+    game.ctx.font = "bold " + tamano + "px Courier";
+    game.ctx.textAlign = "center";
+    game.ctx.fillText(cadena, medio, y);
+    game.ctx.restore();
+}
+
+const score = () => {
+
+    game.ctx.save();
+    game.ctx.fillStyle = "white";
+    game.ctx.font = "bold 20px Courier"
+    game.ctx.fillText("Score: " + game.puntos, 10, 20);
+    game.ctx.restore();
+
+}
 
 
 
